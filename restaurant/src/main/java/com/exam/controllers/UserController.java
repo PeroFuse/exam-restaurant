@@ -5,8 +5,14 @@ import java.util.List;
 import com.exam.dto.User;
 import com.exam.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @Controller
 @RequestMapping(path = "/userAccount")
@@ -41,6 +47,20 @@ public class UserController {
 
     }
 
+    @RequestMapping(value = "/add", headers="Content-Type=application/json", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<Boolean> saveData(HttpServletRequest request,
+                                            HttpServletResponse response, Model model){
+        String name = request.getParameter("name");
+        String surname = request.getParameter("surname");
+        User user = new User();
+        user.setName(name);
+        user.setSurname(surname);
+        userRepository.save(user);
+        return new ResponseEntity<Boolean>(HttpStatus.OK);
+
+    }
+
     /*
      * Mapping url exmaple: http://localhost:8080/userAccount/findAll
      */
@@ -69,37 +89,6 @@ public class UserController {
         } else {
             retBuf.insert(0, "<pre>");
             retBuf.append("</pre>");
-        }
-
-        return retBuf.toString();
-    }
-
-    /*
-     * Mapping url exmaple:
-     * http://localhost:8080/userAccount/findByName?userName=Jerry
-     */
-    @GetMapping(path = "/findByName")
-    @ResponseBody
-    public String findByName(@RequestParam String name) {
-
-        StringBuffer retBuf = new StringBuffer();
-
-        List<User> userList = (List<User>) userRepository.findByName(name);
-
-        if (userList != null) {
-            for (User userAccount : userList) {
-                retBuf.append("user name = ");
-                retBuf.append(userAccount.getName());
-                retBuf.append(", password = ");
-                retBuf.append(userAccount.getSurname());
-                retBuf.append(", email = ");
-                retBuf.append(userAccount.getEmail());
-                retBuf.append("\r\n");
-            }
-        }
-
-        if (retBuf.length() == 0) {
-            retBuf.append("No record find.");
         }
 
         return retBuf.toString();
